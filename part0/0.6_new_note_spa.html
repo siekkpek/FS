@@ -1,0 +1,21 @@
+<html>
+  <body>
+    0.6 add note_spa sequence diagram:
+    <pre class="mermaid">
+      sequenceDiagram
+        participant browser
+        participant server
+
+            browser->>server: POST new_note_spa
+            activate server
+            server-->>browser: 201 note created
+            deactivate server
+
+    </pre>
+
+    <script type="module">
+      import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+      mermaid.initialize({ startOnLoad: true });
+    </script>
+  </body>
+</html>
