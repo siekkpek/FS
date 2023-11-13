@@ -7,6 +7,7 @@ const ShowPersons = (props) => {
       .getAll()
       .then(response => {
         props.setPersons(response.data)
+        console.log('data:',response.data)
       })
   }, [])
     return (
@@ -130,6 +131,14 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
   const [nameFiltered, setnameFiltered] = useState('')
   const [message, setMessage] = useState('')
+  const [isError, setIsError] = useState(false)
+
+  const style = {
+        color: isError ? 'red' : 'green',
+        fontSize: 20,
+        padding: 10,
+        marginBottom: 10
+  }
 
   const handleNameChange = (event) => {
     setNewName(event.target.value)
@@ -145,14 +154,16 @@ const App = () => {
 
   const deletePersonOf = (id) => {
     const personToRemove = persons.find((person) => person.id === id)
-    const seconds = 3   
+    const seconds = 3 
+    
     if (window.confirm(`Do you want to remove ${personToRemove.name} ?`)) {
         personService
           .deletePerson(id)
           .then(() => {
             setPersons((persons) =>
               persons.filter((person) => person.id !== id)
-            ) 
+            )
+            setIsError(false)
             setMessage(`${personToRemove.name} removed from phonebook`)
             
             setTimeout(() => {
@@ -160,15 +171,25 @@ const App = () => {
             },seconds * 1000)
            }
           )
+          .catch(error => {
+            setIsError(true)
+            setMessage(`${personToRemove.name} was already removed from phonebook`)
+            setTimeout(() => {
+              setMessage(null)
+            },seconds * 1000)
+            setPersons((persons) =>
+              persons.filter((person) => person.id !== id)
+            ) 
+          })
     }
   }
-
   return (
     <div>
       <h2>Phonebook</h2>
       <FilterPersons nameFiltered={nameFiltered} handleNameFiltered={handleNameFiltered}/>
-      
-      <div className="timerMessage">
+
+      <div style={style}>
+        {isError ? true : false}
         {message}
       </div>
 

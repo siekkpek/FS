@@ -21,6 +21,7 @@ const ShowPersons = (props) => {
 }
 
 const AddNewPerson = (props) => {
+  console.log('Add !!!')
   const seconds = 3
   const [message, setMessage] = useState('')
   const addPerson = (event) => {
