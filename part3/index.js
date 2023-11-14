@@ -1,0 +1,112 @@
+const express = require('express')
+const app = express()
+app.use(express.json())
+const morgan = require('morgan')
+morgan.token('response-body', (req, res) => {return JSON.stringify(req.body)})
+
+app.use(morgan('tiny'))
+app.use(morgan(':method :url :status :res[content-length] :response-time :response-body'))
+
+const cors = require('cors')
+app.use(cors())
+
+let persons = [
+    {
+      id: 1,
+      name: "Arto Hellas",
+      number: "0040-123456"
+    },
+    {
+      id: 2,
+      name: "Ada Lovelace",
+      number: "39-44-5323523"
+    },
+    {
+      id: 3,
+      name: "Dan Abramov",
+      number: "12-43-234345"
+    },
+    {
+        id: 4,
+        name: "Mary Poppendick",
+        number: "39-23-6423122"
+      },
+      {
+        id: 5,
+        name: "Kauko Kautto",
+        number: "040-764221"
+      },
+      {
+        id: 6,
+        name: "Jussi Salonen",
+        number: "0400-211622"
+      },
+      {
+        id: 26,
+        name: "Juha Moilanen",
+        number: "0400-654622"
+      }
+  ]
+  
+  app.get('/api/persons', (req, res) => {
+    res.json(persons)
+  })
+
+  app.get('/info', (req, res) => {
+    const numberOfPersons = persons.length
+    let date = new Date()
+    const txt = `Phonebook has info for ${numberOfPersons} people <br/> <br/> ${date}`
+    res.send(txt)
+  })
+
+  app.get('/api/persons/:id', (request, response) => {
+    const id = Number(request.params.id)
+    const person = persons.find(person => person.id === id)
+    if (person) {
+        response.json(person)
+    } else {
+        response.status(404).end()
+    }
+  })
+
+  app.delete('/api/persons/:id', (request, response) => {
+    const id = Number(request.params.id)
+    persons = persons.filter(person => person.id !== id)
+    response.status(204).end()
+  })
+
+  app.post('/api/persons', (request, response) => {
+    const getRandomId = (min, max) => {
+      min = Math.ceil(min)
+      max = Math.floor(max)
+      return Math.floor(Math.random() * (max - min) + min)
+    }
+    
+    const person = {
+      id: getRandomId(20, 60),
+      name: request.body.name,
+      number: request.body.number,
+    }
+    if (!person.name) {
+      return response.status(400).json({ 
+        error: 'name missing' 
+      })
+    } 
+    if (!person.number) {
+      return response.status(400).json({ 
+        error: 'number missing' 
+      })
+    }
+    if (persons.find(existing => existing.name === person.name)) {
+      return response.status(400).json({ 
+        error: 'person already in phonebook' 
+      })
+    }
+    persons = persons.concat(person)
+    response.json(person)
+  })  
+
+  const PORT = process.env.PORT || 3001
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`)
+  })
