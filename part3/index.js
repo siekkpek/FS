@@ -10,6 +10,8 @@ app.use(morgan(':method :url :status :res[content-length] :response-time :respon
 const cors = require('cors')
 app.use(cors())
 
+app.use(express.static('dist'))
+
 let persons = [
     {
       id: 1,
@@ -43,7 +45,7 @@ let persons = [
       },
       {
         id: 26,
-        name: "Juha Moilanen",
+        name: "Juha Jussi Moilanen",
         number: "0400-654622"
       }
   ]
