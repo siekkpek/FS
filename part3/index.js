@@ -14,43 +14,7 @@ app.use(cors())
 
 app.use(express.static('dist'))
 
-let persons = [
-    {
-      id: 1,
-      name: "Arto Hellas",
-      number: "0040-123456"
-    },
-    {
-      id: 2,
-      name: "Ada Lovelace",
-      number: "39-44-5323523"
-    },
-    {
-      id: 3,
-      name: "Dan Abramov",
-      number: "12-43-234345"
-    },
-    {
-        id: 4,
-        name: "Mary Poppendick",
-        number: "39-23-6423122"
-      },
-      {
-        id: 5,
-        name: "Kauko Kautto",
-        number: "040-764221"
-      },
-      {
-        id: 6,
-        name: "Jussi Salonen",
-        number: "0400-211622"
-      },
-      {
-        id: 26,
-        name: "Juha Jussi Moilanen",
-        number: "0400-654622"
-      }
-  ]
+let persons = []
 
   app.get('/api/persons', (request, response) => {
     Person.find({}).then(persons => {
@@ -66,50 +30,42 @@ let persons = [
   })*/
 
   app.get('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    const person = persons.find(person => person.id === id)
-    if (person) {
-        response.json(person)
-    } else {
-        response.status(404).end()
-    }
+    Person.findById(request.params.id).then(person => {
+      response.json(person)
+    })
   })
 
   app.delete('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    persons = persons.filter(person => person.id !== id)
-    response.status(204).end()
+    Person.findByIdAndDelete(request.params.id).then(deletedPerson => {
+      persons = persons.filter(person => person.id !== deletedPerson.id)
+      response.status(204).end()
+    })
   })
 
   app.post('/api/persons', (request, response) => {
-    const getRandomId = (min, max) => {
-      min = Math.ceil(min)
-      max = Math.floor(max)
-      return Math.floor(Math.random() * (max - min) + min)
+    const body = request.body
+    if (body.name === undefined) {
+      return response.status(400).json({ error: 'name missing' })
     }
-    
-    const person = {
-      id: getRandomId(20, 60),
-      name: request.body.name,
-      number: request.body.number,
+    if (body.number === undefined) {
+      return response.status(400).json({ error: 'number missing' })
     }
-    if (!person.name) {
-      return response.status(400).json({ 
-        error: 'name missing' 
-      })
-    } 
-    if (!person.number) {
-      return response.status(400).json({ 
-        error: 'number missing' 
-      })
-    }
-    if (persons.find(existing => existing.name === person.name)) {
+
+    const person = new Person({
+      name: body.name,
+      number: body.number,
+    })
+
+   /* if (persons.find(existing => existing.name === person.name)) {
       return response.status(400).json({ 
         error: 'person already in phonebook' 
       })
-    }
-    persons = persons.concat(person)
-    response.json(person)
+    }*/
+
+    person.save().then(savedPerson => {
+      persons = persons.concat(savedPerson)
+      response.json(savedPerson)
+    })
   })  
 
   const PORT = process.env.PORT
